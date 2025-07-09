@@ -36,7 +36,7 @@ This is a RESTful chat application that allows users to register, login, create 
 ### Authentication
 
 - **POST /login** - Authenticate a user
-  - Request body (x-www-form-urlencoded): `{ "login": "username", "password": "password" }`
+  - Request parameters (x-www-form-urlencoded): `login`, `password`
 
 ### User Management
 
