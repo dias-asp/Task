@@ -10,6 +10,6 @@ import javax.persistence.*;
 public class ChatRoom {
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     private String name;
 }

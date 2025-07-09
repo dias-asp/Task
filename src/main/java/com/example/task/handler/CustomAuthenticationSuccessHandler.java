@@ -21,9 +21,12 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
     protected void handle(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         response.setStatus(HttpStatus.OK.value());
-        response.getWriter().write("login success");
+        response.setContentType("application/json");
+        String jsonResponse = "{ \"success\": \"true\", \"message\": \"Login successful\" }";
+        response.getWriter().write(jsonResponse);
         response.getWriter().flush();
         response.getWriter().close();
+
     }
 
     protected void clearAuthenticationAttributes(HttpServletRequest request) {

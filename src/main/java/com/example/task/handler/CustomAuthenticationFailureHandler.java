@@ -13,7 +13,9 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
     public void onAuthenticationFailure (HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().write("check login password");
+        response.setContentType("application/json");
+        String jsonResponse = "{ \"success\": \"false\", \"message\": \"Check login and password\" }";
+        response.getWriter().write(jsonResponse);
         response.getWriter().flush();
         response.getWriter().close();
     }

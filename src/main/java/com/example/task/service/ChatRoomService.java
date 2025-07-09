@@ -68,6 +68,10 @@ public class ChatRoomService {
         return getChatRoomByName(name) != null;
     }
 
+    public boolean existsChatRoom(Long id) {
+        return getChatRoomById(id) != null;
+    }
+
     public ChatRoom getChatRoomByName(String name) {
         Iterable<ChatRoom> chatRooms = chatRoomRepository.findAll();
         for (ChatRoom chatRoom : chatRooms) {

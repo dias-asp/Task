@@ -45,6 +45,10 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public boolean existsUserById(Long id) {
+        return userRepository.findById(id).isPresent();
+    }
+
     public User getUserById(Long id) {
         return userRepository.findById(id).orElse(null);
     }

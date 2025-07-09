@@ -6,7 +6,9 @@ import com.example.task.service.ChatRoomService;
 import com.example.task.service.P2PRoomService;
 import com.example.task.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class ChatRoomController {
@@ -21,16 +23,16 @@ public class ChatRoomController {
     private P2PRoomService p2PRoomService;
 
     @PostMapping("/chat")
-    public void createChatRoom(@RequestBody String name) {
-        if (chatRoomService.existsChatRoom(name)) return;
-        chatRoomService.createChatRoom(name);
-        chatRoomEntryService.createChatRoomEntry(userService.getCurrentUser().getId(), chatRoomService.getChatRoomByName(name).getId());
+    public void createChatRoom(@RequestBody ChatRoom chatRoom) {
+        chatRoomService.createChatRoom(chatRoom.getName());
+        chatRoomEntryService.createChatRoomEntry(userService.getCurrentUser().getId(), chatRoom.getId());
     }
 
-    @PostMapping("/chat/{name}/enter")
-    public void enterChatRoom(@PathVariable String name) {
-        if (!chatRoomService.existsChatRoom(name)) return;
-        chatRoomEntryService.createChatRoomEntry(userService.getCurrentUser().getId(), chatRoomService.getChatRoomByName(name).getId());
+    @PostMapping("/chat/enter")
+    public void enterChatRoom(@RequestBody ChatRoom chatRoom) {
+        if (chatRoom.getId() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provide chat room id");
+        if (!chatRoomService.existsChatRoom(chatRoom.getId())) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat room not found");
+        chatRoomEntryService.createChatRoomEntry(userService.getCurrentUser().getId(), chatRoom.getId());
     }
 
     @GetMapping("/chat")

@@ -5,6 +5,8 @@ import com.example.task.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Vector;
+
 @RestController
 public class UserController {
 
@@ -18,12 +20,18 @@ public class UserController {
 
     @GetMapping("/users/current")
     public User getCurrentUser() {
-        return userService.getCurrentUser();
+        User user = userService.getCurrentUser();
+        user.setPassword(null);
+        return user;
     }
 
     @GetMapping("/users")
     public Iterable<User> getUsers() {
-        return userService.getAllUsers();
+        Iterable<User> users = userService.getAllUsers();
+        for (User user : users) {
+            user.setPassword(null);
+        }
+        return users;
     }
 
     @GetMapping("/users/{id}")

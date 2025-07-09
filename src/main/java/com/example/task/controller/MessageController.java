@@ -1,5 +1,6 @@
 package com.example.task.controller;
 
+import com.example.task.model.ChatRoom;
 import com.example.task.model.Message;
 import com.example.task.service.ChatRoomEntryService;
 import com.example.task.service.ChatRoomService;
@@ -12,6 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Vector;
 
 @RestController
@@ -26,43 +29,49 @@ public class MessageController {
     @Autowired
     private ChatRoomEntryService chatRoomEntryService;
 
-    public String messageToString(Message message) {
-        return message.getDate() + " " + userService.getUserById(message.getUser()).getLogin() + ": " + message.getText();
+
+
+    private Iterable<Message> filterMessages(Iterable<Message> messages) {
+        Vector< Message > vector = new Vector < > ();
+        for (Message message : messages) {
+            if (message.getDate().before(new Timestamp(System.currentTimeMillis()))) vector.add(message);
+        }
+        return vector;
     }
 
-    @GetMapping("/chat/{name}")
-    public Iterable<String> getMessages(@PathVariable String name) {
-        if (!chatRoomService.existsChatRoom(name)) return null;
+    @GetMapping("/chat/messages")
+    public Iterable<Message> getMessages(@RequestParam Long chatRoomId) {
+        if (chatRoomId == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provide chat room id");
+        if (!chatRoomService.existsChatRoom(chatRoomId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat room with id " + chatRoomId + " not found");
         if (!chatRoomEntryService.existsChatRoomEntry(
                 userService.getCurrentUser().getId(),
-                chatRoomService.getChatRoomByName(name).getId()))
-            return null;
-        Iterable <Message> messages = messageService.getMessages(chatRoomService.getChatRoomByName(name).getId());
-        Vector< String> vector = new Vector < > ();
-        for (Message message : messages) {
-            vector.add(messageToString(message));
+                chatRoomId))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not in this chat room");
+        return filterMessages(messageService.getMessages(chatRoomId));
+    }
+
+    @GetMapping("/user/messages")
+    public Iterable<Message> getPrivateMessages(@RequestParam Long userId) {
+        Long chatRoom = chatRoomService.getPrivateChat(userId, userService.getCurrentUser().getId());
+        return filterMessages(messageService.getMessages(chatRoom));
+    }
+
+    @PostMapping("/chat/message")
+    public void writeMessage(@RequestBody Message message) {
+        if (!chatRoomService.existsChatRoom(message.getChatRoom())) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat room with id " + message.getChatRoom() + " not found");
+        if (message.getDate() == null) {
+            messageService.createMessage(message.getText(), userService.getCurrentUser().getId(),
+                    message.getChatRoom());
         }
-        return vector;
-    }
-
-    @GetMapping("/user/{login}")
-    public Iterable<String> getPrivateMessages(@PathVariable String login) {
-        Long chatRoom = chatRoomService.getPrivateChat(userService.getUserByLogin(login), userService.getCurrentUser().getId());
-        Iterable<Message> messages = messageService.getMessages(chatRoom);
-        Vector< String> vector = new Vector < > ();
-        for (Message message : messages) {
-            vector.add(messageToString(message));
+        else {
+            Timestamp time = message.getDate();
+            Instant adjustedInstant = time.toInstant().minus(5, ChronoUnit.HOURS);
+            Timestamp newTime = Timestamp.from(adjustedInstant);
+            messageService.createMessage(message.getText(), userService.getCurrentUser().getId(),
+                    message.getChatRoom(), newTime);
         }
-        return vector;
     }
-
-    @PostMapping("/chat/{name}")
-    public void writeMessage(@PathVariable String name, @RequestBody String text) {
-        if (!chatRoomService.existsChatRoom(name)) return;
-        messageService.createMessage(text, userService.getCurrentUser().getId(),
-                chatRoomService.getChatRoomByName(name).getId());
-    }
-
+/*
     @PostMapping("/chat/{name}/{date}")
     public void writeMessage(@PathVariable String name, @RequestBody String text, @PathVariable String date){
         if (!chatRoomService.existsChatRoom(name)) return;
@@ -77,14 +86,23 @@ public class MessageController {
 
 //        messageService.createMessage(text, userService.getCurrentUser().getId(),
 //                chatRoomService.getChatRoomByName(name).getId(), date);
-    }
+    }*/
 
-    @PostMapping("/user/{login}")
-    public void writePrivateMessage(@PathVariable String login, @RequestBody String text) {
-        Long chatRoom = chatRoomService.getPrivateChat(userService.getUserByLogin(login), userService.getCurrentUser().getId());
-        messageService.createMessage(text, userService.getCurrentUser().getId(), chatRoom);
+    @PostMapping("/user/message")
+    public void writePrivateMessage(@RequestBody Message message) {
+        if (!userService.existsUserById(message.getUser())) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + message.getUser() + " not found");
+        Long chatRoom = chatRoomService.getPrivateChat(message.getUser(), userService.getCurrentUser().getId());
+        if (message.getDate() == null) {
+            messageService.createMessage(message.getText(), userService.getCurrentUser().getId(), chatRoom);
+        }
+        else {
+            Timestamp time = message.getDate();
+            Instant adjustedInstant = time.toInstant().minus(5, ChronoUnit.HOURS);
+            Timestamp newTime = Timestamp.from(adjustedInstant);
+            messageService.createMessage(message.getText(), userService.getCurrentUser().getId(), chatRoom, newTime);
+        }
     }
-
+/*
     @PostMapping("/user/{login}/{date}")
     public void writePrivateMessage(@PathVariable String login, @RequestBody String text, @PathVariable String date) {
         Long chatRoom = chatRoomService.getPrivateChat(userService.getUserByLogin(login), userService.getCurrentUser().getId());
@@ -95,5 +113,5 @@ public class MessageController {
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Date format is invalid. Use 'yyyy-MM-dd HH:mm:ss'", e);
         }
-    }
+    }*/
 }
