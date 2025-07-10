@@ -70,15 +70,17 @@ This is a RESTful chat application that allows users to register, login, create 
   - Example: `GET /chat/messages?chatRoomId=1`
 
 - **POST /chat/message** - Send a message to a chat room
-  - Request body: `{ "text": "Hello!", "chatRoom": 1 }`
-  - Example: `POST /chat/message` with body `{ "text": "Hello!", "chatRoom": 1 }`
+  - Request body for instant message: `{ "text": "Hello!", "chatRoom": "1" }`
+  - Request body for delayed message: `{ "text": "Hello!", "chatRoom": "1", "date": "2025-07-09T20:00:00" }`
 
 - **GET /user/messages** - Get private messages between the current user and another user
   - Request parameter: `userId`
   - Example: `GET /user/messages?userId=2`
 
 - **POST /user/message** - Send a private message to another user
-  - Request body: `{ "text": "Hello!", "user": 2 }`
+-
+  - Request body for instant message: `{ "text": "Hello!", "user": "1" }`
+  - Request body for delayed message: `{ "text": "Hello!", "user": "1", "date": "2025-07-09T20:00:00" }`
 
 ## Stopping the Application
 
