@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Vector;
 
-@RestController
 @Service
 public class ChatRoomService {
 
@@ -59,7 +58,6 @@ public class ChatRoomService {
             id2 = id1 - id2;
             id1 -= id2;
         }
-        System.out.println("id1: " + id1 + " id2: " + id2);
         if (!p2PRoomService.existsP2PRoom(id1, id2)) {createP2PRoom(id1, id2);}
         return p2PRoomService.getP2PRoom(id1, id2);
     }

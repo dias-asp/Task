@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static com.example.task.service.ChatRoomService.swapId;
 
-@RestController
 @Service
 public class P2PRoomService {
 

@@ -9,7 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
 @Service
 public class UserService {
 
@@ -24,11 +23,7 @@ public class UserService {
     }
 
     public User CreateUser(User user) {
-        System.out.println("Creating User # " + user.getId());
-        System.out.println(user.getLogin());
-        System.out.println(user.getPassword());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        System.out.println(user.getPassword());
         return userRepository.save(user);
     }
 

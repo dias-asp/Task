@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Vector;
 
-@RestController
 @Service
 public class MessageService {
 
@@ -36,13 +35,11 @@ public class MessageService {
     }
 
     public Iterable<Message> getMessages(Long chatRoomId){
-        System.out.println("Getting messages for chat room # " + chatRoomId);
         Iterable<Message> messages = messageRepository.findAll();
         Vector< Message > vector = new Vector < > ();
         for (Message message : messages) {
             if (message.getChatRoom() == chatRoomId && message.getDate().before(new java.sql.Timestamp(System.currentTimeMillis()))) {
                 vector.add(message);
-                System.out.println("FOUND " + message.getText());
             }
         }
         return vector;

@@ -4,10 +4,12 @@ services:
   db:
     image: 'postgres:12.3-alpine'
     container_name: db_container
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password2
-      POSTGRES_DB: chat_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-chat_db}
     ports:
       - "5432:5432"
     restart: always
@@ -19,15 +21,17 @@ services:
     container_name: app_container
     depends_on:
       - db
+    env_file:
+      - .env
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/chat_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password2
-      SPRING_FLYWAY_URL: jdbc:postgresql://db:5432/chat_db
-      SPRING_FLYWAY_USER: postgres
-      SPRING_FLYWAY_PASSWORD: password2
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://db:5432/chat_db}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_FLYWAY_URL: ${SPRING_FLYWAY_URL:-jdbc:postgresql://db:5432/chat_db}
+      SPRING_FLYWAY_USER: ${SPRING_FLYWAY_USER:-postgres}
+      SPRING_FLYWAY_PASSWORD: ${SPRING_FLYWAY_PASSWORD:-${SPRING_DATASOURCE_PASSWORD}}
 
 volumes:
   postgres_data:

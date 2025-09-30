@@ -41,12 +41,12 @@ public class MessageController {
 
     @GetMapping("/chat/messages")
     public Iterable<Message> getMessages(@RequestParam Long chatRoomId) {
-        if (chatRoomId == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provide chat room id");
-        if (!chatRoomService.existsChatRoom(chatRoomId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat room with id " + chatRoomId + " not found");
+        if (chatRoomId == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid request");
+        if (!chatRoomService.existsChatRoom(chatRoomId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
         if (!chatRoomEntryService.existsChatRoomEntry(
                 userService.getCurrentUser().getId(),
                 chatRoomId))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not in this chat room");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden");
         return filterMessages(messageService.getMessages(chatRoomId));
     }
 
@@ -58,7 +58,7 @@ public class MessageController {
 
     @PostMapping("/chat/message")
     public void writeMessage(@RequestBody Message message) {
-        if (!chatRoomService.existsChatRoom(message.getChatRoom())) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat room with id " + message.getChatRoom() + " not found");
+        if (!chatRoomService.existsChatRoom(message.getChatRoom())) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
         if (message.getDate() == null) {
             messageService.createMessage(message.getText(), userService.getCurrentUser().getId(),
                     message.getChatRoom());
@@ -90,7 +90,7 @@ public class MessageController {
 
     @PostMapping("/user/message")
     public void writePrivateMessage(@RequestBody Message message) {
-        if (!userService.existsUserById(message.getUser())) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + message.getUser() + " not found");
+        if (!userService.existsUserById(message.getUser())) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
         Long chatRoom = chatRoomService.getPrivateChat(message.getUser(), userService.getCurrentUser().getId());
         if (message.getDate() == null) {
             messageService.createMessage(message.getText(), userService.getCurrentUser().getId(), chatRoom);

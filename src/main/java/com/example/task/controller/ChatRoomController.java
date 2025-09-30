@@ -24,14 +24,14 @@ public class ChatRoomController {
 
     @PostMapping("/chat")
     public void createChatRoom(@RequestBody ChatRoom chatRoom) {
-        chatRoomService.createChatRoom(chatRoom.getName());
-        chatRoomEntryService.createChatRoomEntry(userService.getCurrentUser().getId(), chatRoom.getId());
+        Long newChatRoomId = chatRoomService.createChatRoom(chatRoom.getName());
+        chatRoomEntryService.createChatRoomEntry(userService.getCurrentUser().getId(), newChatRoomId);
     }
 
     @PostMapping("/chat/enter")
     public void enterChatRoom(@RequestBody ChatRoom chatRoom) {
-        if (chatRoom.getId() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provide chat room id");
-        if (!chatRoomService.existsChatRoom(chatRoom.getId())) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat room not found");
+        if (chatRoom.getId() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid request");
+        if (!chatRoomService.existsChatRoom(chatRoom.getId())) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
         chatRoomEntryService.createChatRoomEntry(userService.getCurrentUser().getId(), chatRoom.getId());
     }
 
